@@ -1,0 +1,69 @@
+@model TrainerCreateViewModel
+@{ ViewData["Title"] = "Add Trainer"; }
+
+<div class="container">
+    <header class="mb-4 mt-5">
+        <h3 class="text-primary-color">Add Trainer</h3>
+    </header>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label asp-for="Name" class="form-label fw-medium">Name <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control" placeholder="e.g. Ahmed Ali" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-12 col-md-6">
+                <label asp-for="Email" class="form-label fw-medium">Email <span class="text-danger">*</span></label>
+                <input asp-for="Email" class="form-control" type="email" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-12 col-md-6">
+                <label asp-for="Phone" class="form-label fw-medium">Phone <span class="text-danger">*</span></label>
+                <input asp-for="Phone" class="form-control" placeholder="010XXXXXXXX" />
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+            <div class="col-12 col-md-6">
+                <label asp-for="Specialization" class="form-label fw-medium">Specialization <span class="text-danger">*</span></label>
+                <input asp-for="Specialization" class="form-control" placeholder="e.g. Boxing" />
+                <span asp-validation-for="Specialization" class="text-danger small"></span>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label fw-medium">Photo</label>
+                <input asp-for="Photo" type="file" class="form-control" accept="image/*" id="photoInput" />
+                <div class="mt-2">
+                    <img id="photoPreview" src="#" alt="Preview"
+                         style="display:none;width:80px;height:80px;object-fit:cover;border-radius:50%;" />
+                </div>
+            </div>
+        </div>
+
+        <footer class="d-flex justify-content-end gap-3 mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-left me-2"></i>Back to List
+            </a>
+            <button type="submit" class="btn btn-fill px-4">
+                <i class="bi bi-plus-circle me-2"></i>Add Trainer
+            </button>
+        </footer>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('photoInput').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var p = document.getElementById('photoPreview');
+                    p.src = e.target.result;
+                    p.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,94 @@
+@{
+    Layout = null;  // standalone page, no navbar
+    ViewData["Title"] = "Access Denied";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Power Fitness</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .access-denied-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 60px;
+            max-width: 800px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .error-icon    { font-size: 60px; }
+        .lock-icon     { font-size: 110px; text-align: center; }
+        .error-code    {
+            background: #f0f0f0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .btn-home {
+            background: #3B0ED9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-home:hover {
+            background: #2d0baa;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="access-denied-card">
+
+        <!-- Left: Error info -->
+        <div>
+            <div class="error-icon">🚫</div>
+            <h1 class="fw-bold mt-3" style="font-size:42px;">
+                Access <span style="color:#3B0ED9;">Denied</span>
+            </h1>
+            <p class="text-muted mt-3">
+                You are logged in, but your role doesn't have permission to access this page.
+            </p>
+            <div class="error-code">Error 403 — Forbidden Access</div>
+            <p class="text-muted mt-2 small">
+                Contact the system administrator if you need elevated permissions.
+            </p>
+            <a asp-action="Index" asp-controller="Home" class="btn-home">
+                ← Return to Home
+            </a>
+        </div>
+
+        <!-- Right: Lock icon -->
+        <div class="lock-icon">🔒</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

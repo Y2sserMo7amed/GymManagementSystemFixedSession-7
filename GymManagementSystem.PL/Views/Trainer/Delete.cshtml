@@ -1,0 +1,27 @@
+@model TrainerDeleteViewModel
+@{ ViewData["Title"] = "Delete Trainer"; }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-5 shadow text-center">
+                <p class="fs-3 text-primary-color mb-2">Are you sure you want to delete this trainer?</p>
+                <p class="fw-bold fs-5 text-muted mb-4">@Model.Name</p>
+
+                <div class="alert alert-warning text-start" role="alert">
+                    <strong>Warning!</strong> This action cannot be undone.
+                    All trainer data will be permanently deleted.
+                </div>
+
+                <form asp-action="DeleteConfirmed" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <input name="id" type="hidden" value="@Model.Id" />
+                    <div class="buttons d-flex justify-content-between gap-3">
+                        <a asp-action="Index" class="btn btn-outline flex-fill">NO</a>
+                        <button type="submit" class="btn btn-fill flex-fill">Yes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

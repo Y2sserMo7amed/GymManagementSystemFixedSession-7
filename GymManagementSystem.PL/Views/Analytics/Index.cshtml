@@ -1,0 +1,344 @@
+@model GymManagementSystem.BLL.ViewModels.AnalyticsViewModel
+@{
+    ViewData["Title"] = "Analytics";
+
+    // Prepare data for charts (convert C# lists → JavaScript arrays)
+    // Category names for bar chart
+    var categoryNames  = string.Join(",", Model.SessionsByCategory.Select(x => $"'{x.CategoryName}'"));
+    var categoryCounts = string.Join(",", Model.SessionsByCategory.Select(x => x.Count));
+
+    // Plan names for doughnut chart
+    var planNames  = string.Join(",", Model.PlanPopularity.Select(x => $"'{x.PlanName}'"));
+    var planCounts = string.Join(",", Model.PlanPopularity.Select(x => x.MemberCount));
+}
+
+<div class="container py-4">
+
+    <!-- Page Title -->
+    <h2 class="fw-bold mb-4" style="color: #3B0ED9;">
+        <i class="bi bi-bar-chart-line-fill me-2"></i> Analytics Dashboard
+    </h2>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 1: Summary Cards (4 boxes at the top)
+         Each card shows one key number from the database
+    ════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-5">
+
+        <!-- Card 1: Total Members -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="analytics-card text-white" style="background: linear-gradient(135deg,#3B0ED9,#6a4af0);">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1 opacity-75 small fw-semibold text-uppercase">Total Members</p>
+                        <h2 class="fw-bold mb-0">@Model.TotalMembers</h2>
+                    </div>
+                    <div class="analytics-card-icon">
+                        <i class="bi bi-people-fill fs-2"></i>
+                    </div>
+                </div>
+                <p class="mb-0 mt-3 small opacity-75">
+                    <i class="bi bi-person-fill me-1"></i>
+                    @Model.MaleMembersCount Male &nbsp;|&nbsp; @Model.FemaleMembersCount Female
+                </p>
+            </div>
+        </div>
+
+        <!-- Card 2: Total Trainers -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="analytics-card text-white" style="background: linear-gradient(135deg,#0d6efd,#3b8de0);">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1 opacity-75 small fw-semibold text-uppercase">Total Trainers</p>
+                        <h2 class="fw-bold mb-0">@Model.TotalTrainers</h2>
+                    </div>
+                    <div class="analytics-card-icon">
+                        <i class="bi bi-person-badge-fill fs-2"></i>
+                    </div>
+                </div>
+                <p class="mb-0 mt-3 small opacity-75">
+                    <i class="bi bi-star-fill me-1"></i> Expert Coaches
+                </p>
+            </div>
+        </div>
+
+        <!-- Card 3: Total Sessions -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="analytics-card text-white" style="background: linear-gradient(135deg,#198754,#28c16a);">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1 opacity-75 small fw-semibold text-uppercase">Total Sessions</p>
+                        <h2 class="fw-bold mb-0">@Model.TotalSessions</h2>
+                    </div>
+                    <div class="analytics-card-icon">
+                        <i class="bi bi-calendar3-fill fs-2"></i>
+                    </div>
+                </div>
+                <p class="mb-0 mt-3 small opacity-75">
+                    <i class="bi bi-clock-fill me-1"></i> Across all categories
+                </p>
+            </div>
+        </div>
+
+        <!-- Card 4: Active Plans -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="analytics-card text-white" style="background: linear-gradient(135deg,#fd7e14,#fca844);">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1 opacity-75 small fw-semibold text-uppercase">Active Plans</p>
+                        <h2 class="fw-bold mb-0">@Model.ActivePlans</h2>
+                    </div>
+                    <div class="analytics-card-icon">
+                        <i class="bi bi-card-checklist fs-2"></i>
+                    </div>
+                </div>
+                <p class="mb-0 mt-3 small opacity-75">
+                    <i class="bi bi-check-circle-fill me-1"></i> Currently available
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 2: Charts Row
+         Left  → Bar chart  (Sessions by Category)
+         Right → Doughnut   (Members by Gender)
+    ════════════════════════════════════════════════════════════ -->
+    <div class="row g-4 mb-5">
+
+        <!-- Bar Chart: Sessions by Category -->
+        <div class="col-12 col-lg-7">
+            <div class="analytics-chart-box">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Sessions by Category
+                </h5>
+                <canvas id="sessionsByCategoryChart" height="250"></canvas>
+            </div>
+        </div>
+
+        <!-- Doughnut Chart: Members by Gender -->
+        <div class="col-12 col-lg-5">
+            <div class="analytics-chart-box">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Members by Gender
+                </h5>
+                <canvas id="genderChart" height="250"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 3: Plan Popularity + Recent Members
+         Left  → Doughnut chart (Plan Popularity)
+         Right → Table of 5 most recent members
+    ════════════════════════════════════════════════════════════ -->
+    <div class="row g-4">
+
+        <!-- Plan Popularity Chart -->
+        <div class="col-12 col-lg-5">
+            <div class="analytics-chart-box">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-trophy-fill me-2 text-warning"></i>Plan Popularity
+                </h5>
+                @if (Model.PlanPopularity.Any())
+                {
+                    <canvas id="planChart" height="250"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No memberships yet.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Recent Members Table -->
+        <div class="col-12 col-lg-7">
+            <div class="analytics-chart-box">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-lines-fill me-2 text-success"></i>Recent Members
+                </h5>
+
+                @if (Model.RecentMembers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Gender</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var member in Model.RecentMembers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <img src="~/images/@(member.Photo ?? "icon.jpg")"
+                                                 alt="@member.Name"
+                                                 class="rounded-circle"
+                                                 style="width:38px;height:38px;object-fit:cover;" />
+                                        </td>
+                                        <td class="fw-semibold">@member.Name</td>
+                                        <td class="text-muted small">@member.Email</td>
+                                        <td>
+                                            @if (member.Gender == "Male")
+                                            {
+                                                <span class="badge bg-primary">Male</span>
+                                            }
+                                            else if (member.Gender == "Female")
+                                            {
+                                                <span class="badge bg-danger">Female</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No members yet.</p>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     CSS: Analytics page styles (card and chart box styles)
+════════════════════════════════════════════════════════════ -->
+<style>
+    /* Stat card */
+    .analytics-card {
+        border-radius: 16px;
+        padding: 1.4rem 1.5rem;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+        transition: transform 0.2s;
+    }
+    .analytics-card:hover {
+        transform: translateY(-4px);
+    }
+    .analytics-card-icon {
+        opacity: 0.4;
+    }
+
+    /* Chart / table container */
+    .analytics-chart-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+        height: 100%;
+    }
+</style>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     JavaScript: Chart.js charts
+     We load Chart.js from CDN, then draw 3 charts
+════════════════════════════════════════════════════════════ -->
+@section Scripts {
+    <!-- Load Chart.js library from internet CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // ── Chart 1: Sessions by Category (Bar) ─────────────────
+        // Data comes from the C# Model, converted to JS arrays above
+        var ctxBar = document.getElementById('sessionsByCategoryChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(categoryNames)],       // Category names
+                datasets: [{
+                    label: 'Number of Sessions',
+                    data: [@Html.Raw(categoryCounts)],    // Session counts
+                    backgroundColor: [
+                        'rgba(59,14,217,0.75)',
+                        'rgba(13,110,253,0.75)',
+                        'rgba(25,135,84,0.75)',
+                        'rgba(253,126,20,0.75)'
+                    ],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // ── Chart 2: Members by Gender (Doughnut) ───────────────
+        var ctxGender = document.getElementById('genderChart').getContext('2d');
+        new Chart(ctxGender, {
+            type: 'doughnut',
+            data: {
+                labels: ['Male', 'Female', 'Not Specified'],
+                datasets: [{
+                    data: [
+                        @Model.MaleMembersCount,
+                        @Model.FemaleMembersCount,
+                        @(Model.TotalMembers - Model.MaleMembersCount - Model.FemaleMembersCount)
+                    ],
+                    backgroundColor: [
+                        'rgba(13,110,253,0.85)',
+                        'rgba(220,53,69,0.85)',
+                        'rgba(108,117,125,0.85)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // ── Chart 3: Plan Popularity (Doughnut) ─────────────────
+        @if (Model.PlanPopularity.Any())
+        {
+            <text>
+            var ctxPlan = document.getElementById('planChart').getContext('2d');
+            new Chart(ctxPlan, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(planNames)],
+                    datasets: [{
+                        data: [@Html.Raw(planCounts)],
+                        backgroundColor: [
+                            'rgba(59,14,217,0.85)',
+                            'rgba(13,110,253,0.85)',
+                            'rgba(253,126,20,0.85)',
+                            'rgba(25,135,84,0.85)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            </text>
+        }
+    </script>
+}
